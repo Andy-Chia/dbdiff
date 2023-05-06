@@ -4,11 +4,40 @@ import java.util.List;
 import java.util.Objects;
 
 public class Table {
-    private  String tableName;
-    private  List<Column> columns;
-    private  Index primaryKey;
-    private  List<Index> indexes;
-    private  String comment;
+    private String tableName;
+    private List<Column> columns;
+    private Index primaryKey;
+    private List<Index> indexes;
+    private String comment;
+    private String charset;
+
+    private String collate;
+
+    private String engine;
+
+    public String getEngine() {
+        return engine;
+    }
+
+    public void setEngine(String engine) {
+        this.engine = engine;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
+    public String getCollate() {
+        return collate;
+    }
+
+    public void setCollate(String collate) {
+        this.collate = collate;
+    }
 
     public String getTableName() {
         return tableName;

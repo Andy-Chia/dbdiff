@@ -17,6 +17,26 @@ public class Index {
 
     private String columnStr;
 
+    private String indexType;
+
+    private String comment;
+
+    public String getIndexType() {
+        return indexType;
+    }
+
+    public void setIndexType(String indexType) {
+        this.indexType = indexType;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

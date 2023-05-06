@@ -10,6 +10,36 @@ public class Column {
 
     private String tableName;
 
+    private String charset;
+
+    private String collate;
+
+    private String extend ;
+
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend;
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
+    public String getCollate() {
+        return collate;
+    }
+
+    public void setCollate(String collate) {
+        this.collate = collate;
+    }
+
     public Boolean getNullable() {
         return isNullable;
     }

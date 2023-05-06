@@ -24,6 +24,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     @Autowired
     private StandardDatabaseMapper standardDatabaseMapper;
 
+    MysqlSqlGeneratorImpl sqlGenerator = new MysqlSqlGeneratorImpl();
 
     @Override
     public List<Table> getStandardTableList() {
@@ -61,106 +62,28 @@ public class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public String generateCreateTableSql(Table table) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE ");
-        sb.append(table.getTableName());
-        sb.append(" (\n\t");
-
-        List<Column> columns = table.getColumns();
-        for (int i = 0; i < columns.size(); i++) {
-            Column column = columns.get(i);
-            sb.append(column.getName());
-            sb.append(" ");
-            sb.append(column.getType());
-            if (column.getLength() != null && !column.getLength().isEmpty()) {
-                sb.append("(");
-                sb.append(column.getLength());
-                sb.append(")");
-            }
-            if (!column.isNullable()) {
-                sb.append(" NOT NULL");
-            }
-            if (!column.getDefaultValue().isEmpty()) {
-                sb.append(" DEFAULT ");
-                sb.append(column.getDefaultValue());
-            }
-            if (!column.getComment().isEmpty()) {
-                sb.append(" COMMENT '");
-                sb.append(column.getComment());
-                sb.append("'");
-            }
-            if (i < columns.size() - 1) {
-                sb.append(", \n\t");
-            }
-        }
-
-        if (table.getPrimaryKey() != null) {
-            sb.append(", PRIMARY KEY (");
-            sb.append(table.getPrimaryKey().getColumnStr());
-            sb.append(")");
-        }
-
-        List<Index> indexes = table.getIndexes();
-        for (Index index : indexes) {
-            sb.append(", \n\t");
-            if (index.getNonUnique()) {
-                sb.append("INDEX ");
-            } else {
-                sb.append("UNIQUE INDEX ");
-            }
-            sb.append(index.getName());
-            sb.append(" (");
-            sb.append(index.getColumnStr());
-            sb.append(")");
-        }
-
-        if (!table.getComment().isEmpty()) {
-            sb.append("\n) COMMENT='");
-            sb.append(table.getComment());
-            sb.append("';");
-        } else {
-            sb.append("\n);");
-        }
-
-        return sb.toString();
+        return sqlGenerator.generateCreateTableSql(table);
     }
 
     @Override
     public String generateUpdateTableCommentSql(Table table) {
-
-        return "ALTER TABLE " + table.getTableName() + " COMMENT '" + table.getComment() + "';";
+        return sqlGenerator.generateUpdateTableCommentSql(table);
     }
 
     @Override
-    public String generateAddColumnSql( Column column) {
-        return "ALTER TABLE " + column.getTableName() + " ADD COLUMN " + getColumnDefinition(column) + ";";
+    public String generateAddColumnSql(Column column) {
+        return sqlGenerator.generateAddColumnSql(column);
     }
 
     @Override
     public String generateDiffColumnSql(Column standardColumn, Column customColumn) {
-
-        return "ALTER TABLE " + standardColumn.getTableName() + " MODIFY COLUMN ;";
+        return sqlGenerator.generateModifyColumnSql(standardColumn, customColumn);
     }
 
     @Override
     public String generateDropColumnSql(Column column) {
-        return "ALTER TABLE " + column.getTableName() + " DROP COLUMN " + column.getName() + ";";
+        return sqlGenerator.generateDropColumnSql(column);
     }
 
-    // Get the definition of a column as a SQL statement
-    private String getColumnDefinition(Column column) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(column.getName()).append(" ");
-        sb.append(column.getType()).append("(").append(column.getLength()).append(") ");
-        if (!column.isNullable()) {
-            sb.append("NOT NULL ");
-        }
-        if (column.getDefaultValue() != null) {
-            sb.append("DEFAULT '").append(column.getDefaultValue()).append("' ");
-        }
-        return sb.toString().trim();
-    }
-
-    // Get the difference between two columns as a SQL statement
 
 }

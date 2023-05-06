@@ -1,6 +1,9 @@
 package com.andycoder.dbdiff.enums;
 
-public enum ColumTypeEnum {
+import java.util.ArrayList;
+import java.util.List;
+
+public enum ColumnTypeEnum {
 
     MYSQL_BIG_COLUMN_TYPE("big", "1", DbType.MYSQL),
     MYSQL_INT_COLUMN_TYPE("int", "11", DbType.MYSQL),
@@ -14,22 +17,22 @@ public enum ColumTypeEnum {
     MYSQL_TIMESTAMP_COLUMN_TYPE("timestamp", "", DbType.MYSQL),
     DEFAULT_MYSQL_UNKNOWN_TYPE("VARCHAR", "255", DbType.MYSQL);
 
-    ColumTypeEnum(String columType, String defaultLength, DbType dbType) {
-        this.columType = columType;
+    ColumnTypeEnum(String columnType, String defaultLength, DbType dbType) {
+        this.columnType = columnType;
         this.defaultLength = defaultLength;
         this.dbType = dbType;
     }
 
-    private String columType;
+    private String columnType;
     private String defaultLength;
     private DbType dbType;
 
-    public String getColumType() {
-        return columType;
+    public String getColumnType() {
+        return columnType;
     }
 
-    public void setColumType(String columType) {
-        this.columType = columType;
+    public void setColumnType(String columnType) {
+        this.columnType = columnType;
     }
 
     public String getDefaultLength() {
@@ -47,4 +50,7 @@ public enum ColumTypeEnum {
     public void setDbType(DbType dbType) {
         this.dbType = dbType;
     }
+
+
+
 }
