@@ -14,7 +14,7 @@ public class Column {
 
     private String collate;
 
-    private String extend ;
+    private String extend;
 
     public String getExtend() {
         return extend;

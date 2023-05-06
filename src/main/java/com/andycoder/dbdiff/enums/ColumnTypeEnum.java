@@ -1,8 +1,5 @@
 package com.andycoder.dbdiff.enums;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public enum ColumnTypeEnum {
 
     MYSQL_BIG_COLUMN_TYPE("big", "1", DbType.MYSQL),
@@ -50,7 +47,6 @@ public enum ColumnTypeEnum {
     public void setDbType(DbType dbType) {
         this.dbType = dbType;
     }
-
 
 
 }

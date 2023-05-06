@@ -1,6 +1,5 @@
 package com.andycoder.dbdiff.constants;
 
-import com.andycoder.dbdiff.dto.Column;
 import com.andycoder.dbdiff.enums.ColumnTypeEnum;
 
 import java.util.ArrayList;
