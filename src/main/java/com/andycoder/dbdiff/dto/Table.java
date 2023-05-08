@@ -4,15 +4,37 @@ import java.util.List;
 import java.util.Objects;
 
 public class Table {
+    /**
+     * 表名
+     */
     private String tableName;
+    /**
+     * 字段
+     */
     private List<Column> columns;
+    /**
+     * 主键
+     */
     private Index primaryKey;
+    /**
+     * 索引
+     */
     private List<Index> indexes;
+    /**
+     * 注释
+     */
     private String comment;
+    /**
+     * 字符集
+     */
     private String charset;
-
+    /**
+     * 排序
+     */
     private String collate;
-
+    /**
+     * 存储引擎
+     */
     private String engine;
 
     public String getEngine() {

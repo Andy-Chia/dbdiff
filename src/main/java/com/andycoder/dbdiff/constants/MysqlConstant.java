@@ -5,7 +5,7 @@ import com.andycoder.dbdiff.enums.ColumnTypeEnum;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColumTypeConstant {
+public class MysqlConstant {
 
     public static List<String> mysqlDateTypeList() {
         List<String> dateTypeList = new ArrayList<>();

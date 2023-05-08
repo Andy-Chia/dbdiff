@@ -1,19 +1,45 @@
 package com.andycoder.dbdiff.dto;
 
 public class Column {
+    /**
+     * 字段名
+     */
     private String name;
+    /**
+     * 字段类型
+     */
     private String type;
+    /**
+     * 字段长度
+     */
     private String length = "";
+    /**
+     * 是否为空
+     */
     private Boolean isNullable;
+    /**
+     * 默认值
+     */
     private String defaultValue;
+    /**
+     * 字段
+     */
     private String comment;
-
+    /**
+     * 表明
+     */
     private String tableName;
-
+    /**
+     * 字符集
+     */
     private String charset;
-
+    /**
+     * 排序规则
+     */
     private String collate;
-
+    /**
+     * 扩展信息，例如根据修改自动更新等等。
+     */
     private String extend;
 
     public String getExtend() {

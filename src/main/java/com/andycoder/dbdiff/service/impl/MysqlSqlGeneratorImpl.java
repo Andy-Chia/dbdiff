@@ -1,7 +1,7 @@
 package com.andycoder.dbdiff.service.impl;
 
 import cn.hutool.json.JSONUtil;
-import com.andycoder.dbdiff.constants.ColumTypeConstant;
+import com.andycoder.dbdiff.constants.MysqlConstant;
 import com.andycoder.dbdiff.dto.Column;
 import com.andycoder.dbdiff.dto.Index;
 import com.andycoder.dbdiff.dto.Table;
@@ -41,7 +41,7 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
         // Add indexes
         List<Index> indexes = table.getIndexes();
         for (Index index : indexes) {
-            if (ColumTypeConstant.mysqlIngnoreIndexList().contains(index.getName())) {
+            if (MysqlConstant.mysqlIngnoreIndexList().contains(index.getName())) {
                 continue;
             }
             sql.append(", \n\t");
@@ -123,8 +123,8 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
         // 默认值
         if (column.getDefaultValue() != null) {
             // 此处应当判断是否为空，另外，如果是时间类型，默认值需要判断是否是自动生成的相关关键字
-            if (ColumTypeConstant.mysqlDateTypeList().contains(column.getType())
-                    && (ColumTypeConstant.MYSQL_CURRENT_TIMESTAMP.equals(column.getDefaultValue()))) {
+            if (MysqlConstant.mysqlDateTypeList().contains(column.getType())
+                    && (MysqlConstant.MYSQL_CURRENT_TIMESTAMP.equals(column.getDefaultValue()))) {
                 sql.append(" DEFAULT ").append(column.getDefaultValue()).append(" ");
             } else {
                 sql.append(" DEFAULT '").append(column.getDefaultValue()).append("' ");
@@ -132,9 +132,9 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
         }
         // 扩展操作
         if (StringUtils.isNotEmpty(column.getExtend())
-                && !ColumTypeConstant.mysqlIngnoreExtraList().contains(column.getExtend())) {
+                && !MysqlConstant.mysqlIngnoreExtraList().contains(column.getExtend())) {
             String extend = column.getExtend();
-            sql.append(" ").append(ColumTypeConstant.mysqlIngnoreExtraList(extend)).append(" ");
+            sql.append(" ").append(MysqlConstant.mysqlIngnoreExtraList(extend)).append(" ");
         }
 
 
@@ -146,7 +146,7 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
 
     private String getIndexDefinition(Index index) {
         StringBuilder sql = new StringBuilder();
-        if (ColumTypeConstant.mysqlIngnoreIndexList().contains(index.getName())) {
+        if (MysqlConstant.mysqlIngnoreIndexList().contains(index.getName())) {
             return "";
         }
         if (index.getNonUnique()) {

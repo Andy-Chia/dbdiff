@@ -8,17 +8,37 @@ import java.util.List;
 import java.util.Objects;
 
 public class Index {
+    /**
+     * 索引名称
+     */
     private String name;
+    /**
+     * 类型
+     */
     private String type;
+    /**
+     * 列
+     */
     private List<String> columns;
+    /**
+     * 表名
+     */
     private String tableName;
-
+    /**
+     * 唯一索引
+     */
     private Boolean nonUnique;
-
+    /**
+     * 索引字符串
+     */
     private String columnStr;
-
+    /**
+     * 索引类型
+     */
     private String indexType;
-
+    /**
+     * 注释
+     */
     private String comment;
 
     public String getIndexType() {

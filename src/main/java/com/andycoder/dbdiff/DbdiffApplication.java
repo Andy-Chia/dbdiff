@@ -14,7 +14,6 @@ public class DbdiffApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext run = SpringApplication.run(DbdiffApplication.class, args);
-
     }
 
 }
