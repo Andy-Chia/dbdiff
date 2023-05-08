@@ -1,6 +1,7 @@
 package com.andycoder.dbdiff.service;
 
 import com.andycoder.dbdiff.dto.Column;
+import com.andycoder.dbdiff.dto.Index;
 import com.andycoder.dbdiff.dto.Table;
 
 import java.util.List;
@@ -51,4 +52,29 @@ public interface DatabaseService {
      * @return
      */
     public String generateDropColumnSql(Column column);
+
+    /**
+     * 通过table对象生成创建语句
+     *
+     * @param table
+     * @return
+     */
+    public String generateAddIndexSql(Index index);
+
+    /**
+     * 通过table对象生成创建语句
+     *
+     * @param table
+     * @return
+     */
+    public String generateRenameIndexSql(Index standardIndex, Index customIndex);
+
+
+    /**
+     * 通过table对象生成创建语句
+     *
+     * @param table
+     * @return
+     */
+    public String generateDeleteIndexSql(Index index);
 }

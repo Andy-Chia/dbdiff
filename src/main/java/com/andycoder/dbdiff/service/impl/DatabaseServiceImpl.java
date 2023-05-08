@@ -85,5 +85,21 @@ public class DatabaseServiceImpl implements DatabaseService {
         return sqlGenerator.generateDropColumnSql(column);
     }
 
+    @Override
+    public String generateAddIndexSql(Index index) {
+        return sqlGenerator.generateAddIndexSql(index);
+    }
+
+    @Override
+    public String generateRenameIndexSql(Index standardIndex, Index customIndex) {
+        return sqlGenerator.generateRenameIndexSql(standardIndex, customIndex);
+
+    }
+
+    @Override
+    public String generateDeleteIndexSql(Index index) {
+        return sqlGenerator.generateDeleteIndexSql(index);
+    }
+
 
 }

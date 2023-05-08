@@ -45,24 +45,8 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
                 continue;
             }
             sql.append(", \n\t");
-            if (index.getNonUnique()) {
-                sql.append("INDEX ");
-            } else {
-                sql.append("UNIQUE INDEX ");
-            }
-            // 拼接索引字段，避免多列索引的情况。
-            sql.append("`").append(index.getName()).append("` (");
-            List<String> cnames = new ArrayList();
-            for (String cicolumn : index.getColumns()) {
-                cnames.add("`" + cicolumn + "`");
-            }
-            sql.append(String.join(",", cnames)).append(")");
-            if (StringUtils.isNotEmpty(index.getIndexType())) {
-                sql.append(" USING ").append(index.getIndexType());
-            }
-            if (StringUtils.isNotEmpty(index.getComment())) {
-                sql.append(" COMMENT '").append(index.getComment()).append("'");
-            }
+            String indexDefinition = getIndexDefinition(index);
+            sql.append(indexDefinition);
         }
 
         // Add table options
@@ -105,6 +89,21 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
         return "ALTER TABLE " + column.getTableName() + " DROP COLUMN " + column.getName() + ";";
     }
 
+    @Override
+    public String generateAddIndexSql(Index index) {
+        return "ALTER TABLE " + index.getTableName() + " ADD   " + getIndexDefinition(index) + ";";
+    }
+
+    @Override
+    public String generateRenameIndexSql(Index standardIndex, Index customIndex) {
+        return "ALTER TABLE " + customIndex.getTableName() + "  RENAME INDEX `" + customIndex.getName() + "` TO `" + standardIndex.getName() + "`;";
+    }
+
+    @Override
+    public String generateDeleteIndexSql(Index index) {
+        return "ALTER TABLE " + index.getTableName() + " DROP INDEX `" + index.getName() + "`;";
+    }
+
     private String getColumnDefinition(Column column) {
         StringBuilder sql = new StringBuilder();
         sql.append("\t`").append(column.getName()).append("` ").append(column.getType());
@@ -141,6 +140,32 @@ public class MysqlSqlGeneratorImpl implements SqlGenerator {
 
         if (StringUtils.isNotEmpty(column.getComment())) {
             sql.append(" COMMENT '").append(column.getComment()).append("' ");
+        }
+        return sql.toString();
+    }
+
+    private String getIndexDefinition(Index index) {
+        StringBuilder sql = new StringBuilder();
+        if (ColumTypeConstant.mysqlIngnoreIndexList().contains(index.getName())) {
+            return "";
+        }
+        if (index.getNonUnique()) {
+            sql.append("INDEX ");
+        } else {
+            sql.append("UNIQUE INDEX ");
+        }
+        // 拼接索引字段，避免多列索引的情况。
+        sql.append("`").append(index.getName()).append("` (");
+        List<String> cnames = new ArrayList();
+        for (String cicolumn : index.getColumns()) {
+            cnames.add("`" + cicolumn + "`");
+        }
+        sql.append(String.join(",", cnames)).append(")");
+        if (StringUtils.isNotEmpty(index.getIndexType())) {
+            sql.append(" USING ").append(index.getIndexType());
+        }
+        if (StringUtils.isNotEmpty(index.getComment())) {
+            sql.append(" COMMENT '").append(index.getComment()).append("'");
         }
         return sql.toString();
     }

@@ -54,13 +54,11 @@ public class DatabaseComparatorImpl implements DatabaseComparator {
 
                 sqlStatements.add("-- 客户端库中缺少表：" + standardTable.getTableName() + "，创建语句如下：");
                 //sqlStatements.add("-- DROP TABLE IF EXISTS " + standardTable.getTableName() + ";\n");
-                logger.info("创建语句：{}", JSONUtil.toJsonStr(standardTable));
-                logger.info("generateCreateTableStatement:{}", databaseService.generateCreateTableSql(standardTable));
+//                logger.info("创建语句：{}", JSONUtil.toJsonStr(standardTable));
+//                logger.info("generateCreateTableStatement:{}", databaseService.generateCreateTableSql(standardTable));
                 sqlStatements.add(databaseService.generateCreateTableSql(standardTable));
                 // 生成表结构创建语句
                 // 生成建表语句。
-
-
                 continue;
             }
             /**
@@ -74,29 +72,61 @@ public class DatabaseComparatorImpl implements DatabaseComparator {
              */
             for (Column standardColumn : standardColumns) {
                 Column customColumn = getColumnByName(customColumns, standardColumn.getName());
-
                 if (customColumn == null) {
-
                     sqlStatements.add("-- 客户端库中表：" + standardTable.getTableName() + "，缺少字段：" + standardColumn.getName() + "，创建语句如下：");
                     sqlStatements.add(databaseService.generateAddColumnSql(standardColumn));
-
                 } else {
-                    String columnDifference = getColumnDifference(standardColumn, customColumn);
-
-                    if (!columnDifference.isEmpty()) {
-
+                    Boolean columnDifference = getColumnDifference(standardColumn, customColumn);
+                    if (!columnDifference) {
                         sqlStatements.add("-- 客户端库中表：" + standardTable.getTableName() + "，字段不一致,字段：" + standardColumn.getName() + "，修改语句如下：");
                         sqlStatements.add(databaseService.generateDiffColumnSql(standardColumn, customColumn));
+                    }
+                }
+            }
+
+            List<Index> standardIndexes = standardTable.getIndexes();
+            List<Index> customIndexes = customTable.getIndexes();
+            for (Index standardIndex : standardIndexes) {
+                Index indexByName = getIndexByName(standardIndex, customIndexes);
+                if (indexByName == null) {
+                    // 索引根据名字没找到两种情况，
+                    // 第一种，这个索引真的没有，
+                    // 第二种，这个索引在，但是索引名称不对。
+                    // 所以先进行根据索引内容查找。
+                    Index indexByIndexInfo = getIndexByIndexInfo(standardIndex, customIndexes);
+                    if (indexByIndexInfo == null) {
+                        sqlStatements.add("-- 客户端库中表：" + standardTable.getTableName() + "，缺少索引：" + standardIndex.getName() + "，创建语句如下：");
+                        sqlStatements.add(databaseService.generateAddIndexSql(standardIndex));
+                    } else {
+                        // 判断索引除了名字，之外的信息是否一致
+                        boolean indexDifference = getIndexDifference(standardIndex, indexByIndexInfo);
+                        if (indexDifference) {
+                            // 重命名索引
+
+                            sqlStatements.add("-- 客户端库中表：" + standardTable.getTableName() + "，存在索引,列值为：" + standardIndex.getColumnStr() + "，重命名索引：");
+                            sqlStatements.add(databaseService.generateRenameIndexSql(standardIndex, indexByIndexInfo));
+
+                        } else {
+                            // 修改索引。
+                            sqlStatements.add("-- 客户端库中表：" + standardTable.getTableName() + "，存在索引,列值为：" + standardIndex.getColumnStr() + "，重建索引：");
+                            sqlStatements.add(databaseService.generateDeleteIndexSql( indexByIndexInfo));
+                            sqlStatements.add(databaseService.generateAddIndexSql(standardIndex));
+                        }
 
                     }
 
-//                    String indexDifference = getIndexDifference(standardColumn, customColumn);
-//
-//                    if (!indexDifference.isEmpty()) {
-//                        sqlStatements.add(indexDifference);
-//                    }
+                } else {
+                    // 比对索引
+                    boolean indexDifference = getIndexDifference(standardIndex, indexByName);
+                    if (!indexDifference) {
+                        // 修改索引。
+                        sqlStatements.add("-- 客户端库中表：" + standardTable.getTableName() + "，存在索引,列值为：" + standardIndex.getColumnStr() + "，重建索引：");
+                        sqlStatements.add(databaseService.generateDeleteIndexSql( indexByName));
+                        sqlStatements.add(databaseService.generateAddIndexSql(standardIndex));
+                    }
                 }
             }
+
 
             // Add new columns to the custom table
             for (Column customColumn : customColumns) {
@@ -189,7 +219,7 @@ public class DatabaseComparatorImpl implements DatabaseComparator {
 //
 //        for (Index customIndex : customIndexes) {
 //            if (!hasIndex(standardIndexes, customIndex)) {
-//                return "ALTER TABLE " + standardColumn.getTable().getName() + " ADD " + customIndex.getType() + " INDEX " + customIndex.getName() + " (" + customColumn.getName() + ");";
+//                return "ALTER TABLE " + standardColumn.getTableName() + " ADD " + customIndex.getType() + " INDEX " + customIndex.getName() + " (" + customColumn.getName() + ");";
 //            }
 //        }
 //
@@ -206,19 +236,61 @@ public class DatabaseComparatorImpl implements DatabaseComparator {
         return false;
     }
 
-    private String getColumnDifference(Column standardColumn, Column customColumn) {
-        if (!standardColumn.getType().equals(customColumn.getType()) || !standardColumn.getLength().equals(customColumn.getLength())) {
-            return customColumn.getName() + " " + customColumn.getType() + "(" + customColumn.getLength() + ")";
-        }
-
-        if (!standardColumn.isNullable().equals(customColumn.isNullable())) {
-            if (customColumn.isNullable()) {
-                return customColumn.getName() + " NULL";
-            } else {
-                return customColumn.getName() + " NOT NULL";
+    private Index getIndexByName(Index index, List<Index> indexes) {
+        for (Index i : indexes) {
+            if (i.getName().equals(index.getName())) {
+                return i;
             }
         }
-
-        return "";
+        return null;
     }
+
+    private Index getIndexByIndexInfo(Index index, List<Index> indexes) {
+        for (Index i : indexes) {
+            if (i.getColumnStr().equals(index.getColumnStr())) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    private boolean getColumnDifference(Column standardColumn, Column customColumn) {
+        if (compareString(standardColumn.getType(), customColumn.getType())
+                && compareString(standardColumn.getLength(), customColumn.getLength())
+                && compareString(standardColumn.getComment(), customColumn.getComment())
+                && compareString(standardColumn.getCharset(), customColumn.getCharset())
+                && compareString(standardColumn.getCollate(), customColumn.getCollate())
+                && compareString(standardColumn.getExtend(), customColumn.getExtend())
+                && standardColumn.isNullable().equals(customColumn.isNullable())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean getIndexDifference(Index standardIndex, Index customIndex) {
+        if (compareString(standardIndex.getColumnStr(), customIndex.getColumnStr())
+                && compareString(standardIndex.getComment(), customIndex.getComment())
+                && compareString(standardIndex.getIndexType(), customIndex.getIndexType())
+                && standardIndex.getNonUnique().equals(customIndex.getNonUnique())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean compareString(String a, String b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null && b != null) {
+            return false;
+        }
+        if (a.equals(b)) {
+            return true;
+        }
+        return false;
+    }
+
+
 }
